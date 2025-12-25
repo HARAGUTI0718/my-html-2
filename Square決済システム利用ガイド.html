@@ -1,0 +1,1085 @@
+<!DOCTYPE html>
+<html lang="ja" data-theme="light" style=""><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Square決済システム利用ガイド</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&amp;display=swap" rel="stylesheet">
+    <style>
+      body {
+        max-width: 880px;
+        margin: 0 auto;
+        padding: 10px 20px;
+        position: relative;
+        box-sizing: border-box;
+        font-family: 'Noto Sans JP', Arial, sans-serif;
+        line-height: 1.4;
+        color: #333;
+      }
+
+      .page {
+        page-break-after: always;
+        min-height: 900px;
+        margin-bottom: 20px;
+      }
+
+      .page:last-child {
+        page-break-after: auto;
+      }
+
+      .header {
+        text-align: center;
+        margin-bottom: 10px;
+        padding: 5px 10px;
+        background-color: #f8f9fa;
+        border-left: 5px solid #007bff;
+      }
+
+      .header h1 {
+        margin: 2px 0;
+        font-size: 1.3em;
+      }
+
+      .header p {
+        margin: 2px 0;
+      }
+
+      .alert-box {
+        background-color: #fff3cd;
+        border: 2px solid #ffc107;
+        border-radius: 8px;
+        padding: 8px;
+        margin: 8px 0;
+        text-align: center;
+      }
+
+      .alert-box h3 {
+        color: #856404;
+        margin-top: 0;
+        margin-bottom: 5px;
+        font-size: 1.05em;
+      }
+
+      .payment-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 10px;
+        margin: 10px 0;
+        align-items: stretch;
+      }
+
+      .payment-method {
+        border: 2px solid #e9ecef;
+        border-radius: 8px;
+        padding: 10px;
+        text-align: center;
+        background-color: #fff;
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+      }
+
+      .payment-method.credit {
+        border-color: #007bff;
+        background-color: #f8f9ff;
+      }
+
+      .payment-method.electronic {
+        border-color: #28a745;
+        background-color: #f8fff9;
+      }
+
+      .payment-method.qr {
+        border-color: #dc3545;
+        background-color: #fff8f8;
+      }
+
+      .payment-method h3 {
+        margin-top: 0;
+        margin-bottom: 5px;
+        font-size: 1.1em;
+      }
+
+      .brand-list {
+        font-size: 0.85em;
+        line-height: 1.3;
+        margin-top: 3px;
+        margin-bottom: 10px;
+        flex-grow: 1;
+      }
+
+      .step-container {
+        margin: 30px 0;
+        padding: 20px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        background-color: #fafafa;
+      }
+
+      .step-title {
+        background-color: #007bff;
+        color: white;
+        padding: 10px 15px;
+        margin: -20px -20px 15px -20px;
+        border-radius: 8px 8px 0 0;
+        font-weight: bold;
+      }
+
+      .step-title.electronic {
+        background-color: #28a745;
+      }
+
+      .step-title.qr {
+        background-color: #dc3545;
+      }
+
+      .sub-method {
+        margin: 20px 0;
+        padding: 15px;
+        border-left: 4px solid #007bff;
+        background-color: #fff;
+      }
+
+      .step-list {
+        counter-reset: step-counter;
+        list-style: none;
+        padding: 0;
+      }
+
+      .step-list li {
+        counter-increment: step-counter;
+        margin: 10px 0;
+        padding: 10px 15px;
+        background-color: #fff;
+        border-radius: 5px;
+        border-left: 4px solid #007bff;
+        position: relative;
+      }
+
+      .step-list li::before {
+        content: counter(step-counter);
+        position: absolute;
+        left: -15px;
+        top: 50%;
+        transform: translateY(-50%);
+        background-color: #007bff;
+        color: white;
+        width: 25px;
+        height: 25px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 0.9em;
+      }
+
+      .icon {
+        font-size: 1.8em;
+        margin-bottom: 5px;
+      }
+
+      .credit {
+        color: #007bff;
+      }
+      .electronic {
+        color: #28a745;
+      }
+      .qr {
+        color: #dc3545;
+      }
+
+      .page-number {
+        text-align: center;
+        margin-top: 40px;
+        font-size: 0.9em;
+        color: #666;
+      }
+
+      .payment-method {
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      .payment-method:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      }
+
+      .tap-hint {
+        font-size: 0.8em;
+        color: #666;
+        margin-top: 10px;
+        font-style: italic;
+      }
+
+      .procedure-btn {
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        padding: 10px 16px;
+        font-size: 0.9em;
+        cursor: pointer;
+        margin-top: auto;
+        margin-bottom: 0;
+        width: 100%;
+        transition: background-color 0.3s ease;
+        align-self: flex-end;
+        -webkit-tap-highlight-color: rgba(0,0,0,0.1);
+        touch-action: manipulation;
+        user-select: none;
+        -webkit-user-select: none;
+      }
+
+      .procedure-btn.electronic {
+        background-color: #28a745;
+      }
+
+      .procedure-btn.qr {
+        background-color: #dc3545;
+      }
+
+      .procedure-btn:hover {
+        opacity: 0.9;
+      }
+
+      .full-width-details {
+        display: none;
+        margin: 10px 0;
+        padding: 12px;
+        border: 2px solid #007bff;
+        border-radius: 8px;
+        background-color: #f8f9ff;
+        width: 100%;
+        box-sizing: border-box;
+      }
+
+      .full-width-details.electronic {
+        border-color: #28a745;
+        background-color: #f8fff9;
+      }
+
+      .full-width-details.qr {
+        border-color: #dc3545;
+        background-color: #fff8f8;
+      }
+
+      .details-header {
+        display: flex;
+        justify-content: flex-start;
+        align-items: center;
+        margin-bottom: 10px;
+        padding-bottom: 8px;
+        border-bottom: 2px solid #ddd;
+        gap: 10px;
+      }
+
+      .details-title {
+        font-size: 1.2em;
+        font-weight: bold;
+        color: #007bff;
+        flex-grow: 1;
+      }
+
+      .details-title.electronic {
+        color: #28a745;
+      }
+
+      .details-title.qr {
+        color: #dc3545;
+      }
+
+      .close-btn {
+        background-color: #6c757d;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        padding: 10px 16px;
+        font-size: 0.9em;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+        margin-left: auto;
+        width: auto;
+        flex-shrink: 0;
+        -webkit-tap-highlight-color: rgba(0,0,0,0.1);
+        touch-action: manipulation;
+        user-select: none;
+        -webkit-user-select: none;
+      }
+
+      .close-btn:hover {
+        background-color: #5a6268;
+      }
+
+      .procedure-steps {
+        display: grid;
+        gap: 10px;
+      }
+
+      .step-category {
+        background-color: white;
+        padding: 12px;
+        border-radius: 6px;
+        border-left: 4px solid #007bff;
+      }
+
+      .step-category.electronic {
+        border-left-color: #28a745;
+      }
+
+      .step-category.qr {
+        border-left-color: #dc3545;
+      }
+
+      .step-category h4 {
+        margin-top: 0;
+        margin-bottom: 8px;
+        color: #333;
+        font-size: 1.05em;
+      }
+
+      .step-list {
+        counter-reset: step-counter;
+        list-style: none;
+        padding: 0;
+        margin: 0;
+      }
+
+      .step-list li {
+        counter-increment: step-counter;
+        margin: 8px 0;
+        padding: 8px 15px;
+        background-color: #f8f9fa;
+        border-radius: 5px;
+        border-left: 3px solid #007bff;
+        position: relative;
+        font-size: 0.95em;
+        line-height: 1.4;
+      }
+
+      .step-list li::before {
+        content: counter(step-counter);
+        position: absolute;
+        left: -15px;
+        top: 50%;
+        transform: translateY(-50%);
+        background-color: #007bff;
+        color: white;
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 0.9em;
+      }
+
+      /* Squareリーダーガイド用スタイル */
+      .reader-guide-btn {
+        background-color: #ff8c00;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 10px 20px;
+        font-size: 1.05em;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        -webkit-tap-highlight-color: rgba(0,0,0,0.1);
+        touch-action: manipulation;
+        user-select: none;
+        -webkit-user-select: none;
+      }
+
+      .reader-guide-btn:hover {
+        background-color: #e07600;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+      }
+
+      .reader-guide-section {
+        margin: 10px 0;
+        padding: 12px;
+        border: 2px solid #28a745;
+        border-radius: 8px;
+        background-color: #f8fff9;
+        width: 100%;
+        box-sizing: border-box;
+      }
+
+      .details-title.reader-guide {
+        color: #28a745;
+      }
+
+      .reader-guide-content {
+        display: grid;
+        gap: 10px;
+      }
+
+      .reader-section {
+        background-color: white;
+        padding: 10px;
+        border-radius: 6px;
+        border-left: 3px solid #28a745;
+      }
+
+      .reader-section h3 {
+        margin-top: 0;
+        margin-bottom: 8px;
+        color: #28a745;
+        font-size: 1.1em;
+      }
+
+      .step-list-reader {
+        display: grid;
+        gap: 6px;
+      }
+
+      .step-item {
+        padding: 8px 12px;
+        background-color: #f8f9fa;
+        border-radius: 5px;
+        border-left: 3px solid #28a745;
+        line-height: 1.4;
+        font-size: 0.95em;
+      }
+
+      .trouble-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 8px;
+        margin-top: 8px;
+      }
+
+      .trouble-item {
+        background-color: #fff3cd;
+        padding: 10px;
+        border-radius: 5px;
+        border-left: 3px solid #ffc107;
+      }
+
+      .trouble-item strong {
+        color: #856404;
+        display: block;
+        margin-bottom: 5px;
+        font-size: 0.95em;
+      }
+
+      .trouble-item ul {
+        margin: 0;
+        padding-left: 15px;
+      }
+
+      .trouble-item li {
+        font-size: 0.85em;
+        line-height: 1.3;
+      }
+
+      .error-section {
+        border-left-color: #ffc107;
+      }
+
+      .error-section h3 {
+        color: #856404;
+      }
+
+      .maintenance-section {
+        border-left-color: #17a2b8;
+      }
+
+      .maintenance-section h3 {
+        color: #17a2b8;
+      }
+
+      .maintenance-list {
+        display: grid;
+        gap: 6px;
+      }
+
+      .maintenance-item {
+        padding: 8px 12px;
+        background-color: #e1f5fe;
+        border-radius: 5px;
+        border-left: 3px solid #17a2b8;
+        line-height: 1.4;
+        font-size: 0.95em;
+      }
+
+      /* 画像表示用スタイル */
+      .instruction-image {
+        max-width: 100%;
+        height: auto;
+        border-radius: 8px;
+        margin: 10px 0;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      }
+
+      .image-container {
+        text-align: center;
+        margin: 8px 0;
+      }
+
+      .image-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+        margin: 8px 0;
+      }
+
+      .image-grid-three {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 15px;
+        margin: 15px 0;
+      }
+    </style>
+  </head>
+  <body style="">
+    <!-- 1ページ目 -->
+    <div class="page">
+      <div class="header">
+        <h1><span style="font-size: 36px;">Square決済システム利用ガイド</span></h1>
+        <p><strong><span style="font-size: 18px;">お客様向け決済方法のご案内</span></strong></p>
+      </div>
+
+      <div class="alert-box">
+        <h3>🚫 重要なお知らせ</h3>
+        <p>
+          <span style="color: #dc3545; font-size: 24px; font-weight: bold;">当店では現金でのお支払いを承っておりません</span><br>
+          <span style="color: rgb(0, 0, 0);"><strong>以下のお支払い方法からお選びください</strong></span>
+        </p>
+      </div>
+
+      <h2 style="margin-top: 10px; margin-bottom: 8px; font-size: 1.3em;">✅ お支払い方法</h2><div style="background-color: #e7f3ff; border-left: 4px solid #007bff; padding: 10px; margin: 10px 0; border-radius: 5px;">
+        <ol style="margin: 5px 0; padding-left: 20px; line-height: 1.4;">
+          <li><strong>Square キャッシュレス決済</strong>（即時決済）</li>
+          <li><strong>コンビニ決済（SMS送信）</strong>（お客様のスマホに送信）</li>
+          <li><strong>コンビニ＋郵便局・銀行振込</strong>（紙の払込票を後日郵送）</li>
+        </ol>
+      </div>
+      
+      <h2 style="color: #007bff; border-bottom: 2px solid #007bff; padding-bottom: 8px; margin-top: 15px; margin-bottom: 10px; font-size: 1.3em;">① Square キャッシュレス決済</h2>
+
+      <div class="payment-grid">
+        <div class="payment-method credit">
+          <div class="icon credit">💳</div>
+          <h3>クレジットカード</h3>
+          <div class="brand-list">
+            <strong>対応ブランド：</strong><br>
+            • Visa<br>
+            • Mastercard<br>
+            • American Express<br>
+            • JCB<br>
+            • Diners Club<br>
+            • Discover<br>
+            • UnionPay
+          </div>
+          <button class="procedure-btn" onclick="showDetails('credit-details')">ご利用手順</button>
+        </div>
+
+        <div class="payment-method electronic">
+          <div class="icon electronic">📱</div>
+          <h3>電子マネー</h3>
+          <div class="brand-list">
+            <strong>交通系IC：</strong><br>
+            Suica, PASMO, Kitaca, TOICA, manaca, ICOCA, SUGOCA, nimoca, はやかけん<br>
+            <strong>その他：</strong><br>
+            iD, QUICPay
+          </div>
+          <button class="procedure-btn electronic" onclick="showDetails('electronic-details')">ご利用手順</button>
+        </div>
+
+        <div class="payment-method qr">
+          <div class="icon qr">📲</div>
+          <h3>QRコード決済</h3>
+          <div class="brand-list">
+            <strong>対応サービス：</strong><br>
+            • PayPay<br>
+            • d払い<br>
+            • au PAY<br>
+            • メルペイ<br>
+            • WeChat Pay<br>
+            • Alipay+
+          </div>
+          <button class="procedure-btn qr" onclick="showDetails('qr-details')">ご利用手順</button>
+        </div>
+      </div>
+
+      <!-- 詳細手順表示エリア -->
+      <div id="credit-details" class="full-width-details" style="display: none;">
+        <div class="details-header">
+          <div class="details-title">💳 クレジットカード決済手順</div>
+          <button class="close-btn" onclick="hideDetails()">✖ 閉じる</button>
+        </div>
+        <div class="procedure-steps">
+          <div class="step-category">
+            <h4>🌟 タッチ決済の場合</h4>
+            <ol class="step-list">
+              <li>スタッフが決済端末に金額を入力します</li>
+              <li>「どうぞ」の合図で端末上部の読み取り部分にカードをかざしてください</li>
+              <li>「ピッ」という音が鳴れば決済完了です</li>
+            </ol>
+          </div>
+          <div class="step-category">
+            <h4>🔢 ICチップの場合</h4>
+            <ol class="step-list">
+              <li>スタッフが決済端末に金額を入力します</li>
+              <li>「どうぞ」の合図で端末下部の溝にカードを奥まで差し込んでください</li>
+              <li>スタッフが提示するスマートフォン画面に暗証番号4桁を入力し、緑のチェックマーク「✓」を押してください</li>
+              <li>決済完了後、カードをお抜き取りください</li>
+            </ol>
+          </div>
+        </div>
+      </div>
+
+      <div id="electronic-details" class="full-width-details electronic" style="display: none;">
+        <div class="details-header">
+          <div class="details-title electronic">📱 電子マネー決済手順</div>
+          <button class="close-btn" onclick="hideDetails()">✖ 閉じる</button>
+        </div>
+        <div class="procedure-steps">
+          <div class="step-category electronic">
+            <h4>📱 電子マネー決済手順</h4>
+            <ol class="step-list">
+              <li>スタッフが決済端末に金額を入力します</li>
+              <li>「どうぞ」の合図で端末上部の読み取り部分に電子マネーカードやスマートフォンをかざしてください</li>
+              <li>決済音（「シャリーン」など）が鳴れば支払い完了です</li>
+            </ol>
+          </div>
+        </div>
+      </div>
+
+      <div id="qr-details" class="full-width-details qr" style="display: none;">
+        <div class="details-header">
+          <div class="details-title qr">📲 QRコード決済手順</div>
+          <button class="close-btn" onclick="hideDetails()">✖ 閉じる</button>
+        </div>
+        <div class="procedure-steps">
+          <div class="step-category qr">
+            <h4>📲 QRコード決済手順</h4>
+            <ol class="step-list">
+              <li>スタッフが決済端末に金額を入力し、スマートフォン画面にQRコードを表示します</li>
+              <li>お客様ご自身のスマートフォンで決済アプリを起動してください</li>
+              <li>スタッフが提示した画面のQRコードを、お客様のアプリで読み取ってください</li>
+              <li>お客様のスマートフォン画面で金額をご確認の上、お支払い（決済）を承認してください</li>
+              <li>スタッフ側の画面が自動で「完了」に切り替わればお支払い完了です</li>
+            </ol>
+          </div>
+        </div>
+      </div>
+
+      <!-- Squareリーダーの使い方ボタン -->
+      <div style="text-align: center; margin-top: 15px; margin-bottom: 10px;">
+        <button class="reader-guide-btn" onclick="showReaderGuide()">
+          📖 Squareリーダー＆アプリの使い方
+        </button>
+      </div>
+
+      <!-- Squareリーダーの使い方詳細 -->
+      <div id="reader-guide" class="reader-guide-section" style="display: none;">
+        <div class="details-header">
+          <div class="details-title reader-guide">📖 Squareリーダーの使い方</div>
+          <button class="close-btn" onclick="hideReaderGuide()">✖ 閉じる</button>
+        </div>
+        
+        <div class="reader-guide-content">
+          <div class="reader-section">
+            <h3>🔌 リーダーの起動と準備</h3>
+            <div class="step-list-reader">
+              <div class="step-item">1. リーダーの電源ボタンを長押しして起動します</div>
+              <div class="step-item">2. Bluetooth接続でスマートフォン/タブレットとペアリングします</div>
+              <div class="step-item">3. Square POSアプリを開き、リーダーが接続されていることを確認します</div>
+            </div>
+
+          </div>
+
+          <div class="reader-section">
+            <h3>💳 クレジットカード決済の操作</h3>
+            <div class="step-list-reader">
+              <div class="step-item">1. Square POSアプリを起動し、キーパッドを選択します</div>
+              <div class="step-item">2. 金額を入力し、必要に応じてメモを追加します</div>
+              <div class="step-item">3. 「売上の確認」ボタンをタップして決済へ進みます</div>
+            </div>
+            <div class="image-grid">
+              <img src="https://page.gensparksite.com/v1/base64_upload/6caedc292d5fcb4d92c5d11a1f3ed4d0" alt="アプリ起動とキーパッド選択" class="instruction-image" data-height-listener-added="true">
+              <img src="https://page.gensparksite.com/v1/base64_upload/36b163fe6483c5ae0af7f020071dbec7" alt="金額入力とメモ追加" class="instruction-image" data-height-listener-added="true">
+            </div>
+            
+            <h4 style="color: #28a745; margin: 10px 0 5px 0; font-size: 1.05em;">🌟 タッチ決済の場合</h4>
+            <div class="step-list-reader">
+              <div class="step-item">4. 決済方法で「タッチまたは挿入してお支払いを完了します」を選択</div>
+              <div class="step-item">5. お客様にリーダー上部にカードをかざしていただきます</div>
+              <div class="step-item">6. 「ピッ」という音が鳴れば決済完了です</div>
+            </div>
+            <div class="image-container">
+              <img src="https://page.gensparksite.com/v1/base64_upload/6c84bff0382b4c10bbcc7417a3a4d002" alt="タッチ決済の操作方法" class="instruction-image" data-height-listener-added="true">
+            </div>
+            
+            <h4 style="color: #28a745; margin: 10px 0 5px 0; font-size: 1.05em;">🔢 ICチップ決済の場合</h4>
+            <div class="step-list-reader">
+              <div class="step-item">4. 決済方法で「タッチまたは挿入してお支払いを完了します」を選択</div>
+              <div class="step-item">5. お客様にカードをリーダー下部のカード挿入口に挿入していただきます</div>
+              <div class="step-item">6. <strong>注意：</strong>暗証番号は使用しません。全てサインで対応します</div>
+              <div class="step-item">7. サイン画面が表示されたら、お客様にサインをしていただきます</div>
+            </div>
+            <div class="image-container">
+              <img src="https://page.gensparksite.com/v1/base64_upload/700658c5d12440036e96d8d60fdae5d4" alt="電子マネー決済の操作" class="instruction-image" data-height-listener-added="true">
+            </div>
+          </div>
+
+          <div class="reader-section">
+            <h3>📱 電子マネー決済の操作</h3>
+            <div class="step-list-reader">
+              <div class="step-item">1. POSアプリで金額を入力し、「売上の確認」をタップ</div>
+              <div class="step-item">2. 決済方法で「交通系IC」を選択します</div>
+              <div class="step-item">3. お客様にリーダー上部に電子マネーカード/スマートフォンをかざしていただきます</div>
+              <div class="step-item">4. 決済音（ピッ、シャリーンなど）が鳴り、決済完了です</div>
+            </div>
+          </div>
+
+          <div class="reader-section">
+            <h3>📲 QRコード決済の操作</h3>
+            <div class="step-list-reader">
+              <div class="step-item">1. POSアプリで金額を入力し、「売上の確認」をタップ</div>
+              <div class="step-item">2. 決済方法で「QRコード」を選択します</div>
+              <div class="step-item">3. 決済サービス（PayPay、d払いなど）を選択します</div>
+              <div class="step-item">4. スマートフォンの画面にQRコードが表示されます</div>
+              <div class="step-item">5. お客様に決済アプリでQRコードを読み取っていただきます</div>
+              <div class="step-item">6. お客様のアプリで決済を承認していただきます</div>
+              <div class="step-item">7. POSアプリに「決済完了」と表示されます</div>
+            </div>
+            <div class="image-container">
+              <img src="https://about.paypay.ne.jp/uploads/2024/12/20241210_01_kv-3.jpg" alt="QRコード決済の画面表示" class="instruction-image" data-height-listener-added="true">
+            </div>
+          </div>
+
+          <div class="reader-section error-section">
+            <h3>⚠️ トラブル対応</h3>
+            <div class="trouble-grid">
+              <div class="trouble-item">
+                <strong>リーダーが接続できない</strong>
+                <ul>
+                  <li>Bluetoothをオフ→オンにする</li>
+                  <li>リーダーを再起動する</li>
+                  <li>アプリを再起動する</li>
+                </ul>
+              </div>
+              <div class="trouble-item">
+                <strong>カードが読み取れない</strong>
+                <ul>
+                  <li>カードを清拭する</li>
+                  <li>挿入位置を確認する</li>
+                  <li>別の決済方法を案内する</li>
+                </ul>
+              </div>
+              <div class="trouble-item">
+                <strong>決済がエラーになる</strong>
+                <ul>
+                  <li>金額を再確認する</li>
+                  <li>ネット接続を確認する</li>
+                  <li>少し時間を置いて再試行</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <div class="reader-section maintenance-section">
+            <h3>🔧 日常メンテナンス</h3>
+            <div class="maintenance-list">
+              <div class="maintenance-item">📱 <strong>充電管理：</strong>1日の終わりに充電ケーブルに接続</div>
+              <div class="maintenance-item">🧹 <strong>清掃：</strong>アルコール系クリーナーで定期的に清拭</div>
+              <div class="maintenance-item">🔄 <strong>アップデート：</strong>Square POSアプリを最新版に保つ</div>
+              <div class="maintenance-item">💾 <strong>データ同期：</strong>Wi-Fi環境で定期的にデータ同期を実行</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <h2 style="color: #ff8c00; border-bottom: 2px solid #ff8c00; padding-bottom: 8px; margin-top: 15px; margin-bottom: 10px; font-size: 1.3em;">② コンビニ決済（SMS送信）</h2>
+      
+      <div style="text-align: center; margin: 10px 0;">
+        <button class="procedure-btn" style="background-color: #ff8c00; max-width: 300px;" onclick="showDetails('convenience-sms-details')">手順を表示</button>
+      </div>
+
+      <div id="convenience-sms-details" class="full-width-details" style="display: none; border-color: rgb(255, 140, 0); background-color: rgb(255, 248, 240);">
+        <div class="details-header">
+          <div class="details-title" style="color: #ff8c00;">📱 SMSでの支払い手順</div>
+          <button class="close-btn" onclick="hideDetails()">✖ 閉じる</button>
+        </div>
+        <p style="font-weight: bold; color: #d63384;">お客様はコンビニまたはペイジーで支払います</p>
+        
+        <div style="background-color: white; padding: 10px; border-radius: 5px; margin: 10px 0;">
+          <h4 style="color: #ff8c00; margin-top: 0; margin-bottom: 5px; font-size: 1.05em;">🎯 支払い方法</h4>
+          <p>お客様のスマートフォンに、お支払い用のURL（バーコードや支払情報）が届きます</p><p>※<span style="color: rgb(65, 84, 98); background-color: rgb(249, 237, 163);"><strong style="background-color: rgb(249, 237, 163);">docomo/au：050-5840-1495、Softbank：21061</strong>で<strong>SMSメッセージ</strong>が届きます</span></p>
+        </div>
+        
+        <div style="background-color: white; padding: 10px; border-radius: 5px; margin: 10px 0;">
+          <h4 style="color: #ff8c00; margin-top: 0; margin-bottom: 5px; font-size: 1.05em;">👤 担当者の操作手順</h4>
+          <ol style="line-height: 1.5; font-size: 0.95em;">
+            <li><strong>決済方法のご確認</strong><br>
+            お客様が「コンビニで」と希望されたら、まずはこちらをご案内します</li>
+            
+            <li><strong>管理画面へログイン</strong>&nbsp;　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　&nbsp;お客様の了承を得たら、ご自身のスマートフォンのブラウザ（または専用アプリ）から、電算システムの<span style="color: rgb(165, 98, 233);">「ペーパーレス収納 管理画面」</span>にログインします
+            <span style="color: #dc3545;">（会社指定の共通ID/パスワードを使用）</span></li>
+            
+            <li><strong>払込情報の発行</strong>&nbsp;　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　「新規発行」などのメニューを選択します　　　　　　　　　　　　　　　　　　　　　　　&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;以下の7項目を正確に入力し、間違いがないかお客様と確認します<ul style="margin-top: 5px; font-size: 0.95em;">
+              <li><span style="color: rgb(165, 98, 233);">① </span><span style="color: rgb(165, 98, 233);">お客様番号：手配No（例：A72-12345）</span></li>
+              <li><span style="color: rgb(165, 98, 233);">② </span><span style="color: rgb(165, 98, 233);">携帯</span><span style="color: rgb(165, 98, 233);">電話番号：お客様の携帯番号（SMSの送信番号）</span></li>
+              <li><span style="color: rgb(165, 98, 233);">③ お客様氏名：お客様のフルネーム</span></li><li><span style="color: rgb(165, 98, 233);">④ 金額：ご請求の税込金額</span></li><li><span style="color: rgb(165, 98, 233);">⑤ 商品名：修理・取替の名称（例：浴室水栓金具修理、ウォシュレット取替など）</span></li>
+              <li><span style="color: rgb(165, 98, 233);">⑥&nbsp;</span><span style="color: rgb(165, 98, 233);">支払期限</span><span style="color: rgb(165, 98, 233);">（例：発行日から14日以内など、会社規定の日数を入力）</span>&nbsp;<span style="color: #dc3545;">※最大30日</span></li><li><span style="color: rgb(165, 98, 233);">⑦ SMS本文：テンプレートより選択（修理用もしくは取替用）</span></li>
+            </ul>
+            </li>
+            
+            <li><strong>SMSの送信と確認</strong><br>
+            入力内容を確認後、「発行（送信）」ボタンを押します<br>
+            <span style="color: #dc3545; font-weight: bold;">⚠️ お客様にSMSが届いたことを必ずその場で確認</span></li>
+            
+            <li><strong>お支払い方法のご案内</strong>&nbsp;　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　&nbsp;お客様に、届いたSMSのリンクを開いてもらいながら、お支払い方法を説明します</li><li><img src="https://page.gensparksite.com/get_upload_url/c9406f60d2373763950a0a8f54bb3a546e8e77542a6fc91d0930d11c295d0805/default/d4848e4d-d694-4c1c-8844-dbb219889850" alt="Uploaded Image" data-height-listener-added="true"></li>
+          </ol>
+        </div>
+      </div>
+      
+      <h2 style="color: #6f42c1; border-bottom: 2px solid #6f42c1; padding-bottom: 8px; margin-top: 15px; margin-bottom: 10px; font-size: 1.3em;">③ コンビニ＋郵便局・銀行振込（紙郵送）</h2>
+      
+      <div style="text-align: center; margin: 10px 0;">
+        <button class="procedure-btn" style="background-color: #6f42c1; max-width: 300px;" onclick="showDetails('convenience-paper-details')">手順を表示</button>
+      </div>
+
+      <div id="convenience-paper-details" class="full-width-details" style="display: none; border-color: rgb(111, 66, 193); background-color: rgb(248, 245, 255);">
+        <div class="details-header">
+          <div class="details-title" style="color: #6f42c1;">📄 紙での郵送手順</div>
+          <button class="close-btn" onclick="hideDetails()">✖ 閉じる</button>
+        </div>
+        <p style="font-weight: bold; color: #d63384;">お客様はコンビニまたは郵便局で支払います</p>
+        
+        <div style="background-color: white; padding: 10px; border-radius: 5px; margin: 10px 0;">
+          <h4 style="color: #6f42c1; margin-top: 0; margin-bottom: 5px; font-size: 1.05em;">🎯 支払い方法</h4>
+          <p>お客様の「紙の払込票で支払いたい」というご希望に対応し、その情報を正確に社内の事務担当者へ引き継ぐ</p>
+        </div>
+        
+        <div style="background-color: white; padding: 10px; border-radius: 5px; margin: 10px 0;">
+          <h4 style="color: #6f42c1; margin-top: 0; margin-bottom: 5px; font-size: 1.05em;">👤 担当者の操作手順</h4>
+          <ol style="line-height: 1.5; font-size: 0.95em;">
+            <li><strong>決済方法のご確認</strong><br>
+            お客様が【SMS送信】も難しい、または「紙の請求書が欲しい」「郵便局で支払いたい」と希望された場合は、こちらをご案内します</li>
+            
+            <li><strong>お支払い方法のご案内</strong><br>
+            郵送される払込票で支払える場所をご案内します</li><li><span style="color: rgb(65, 84, 98); font-size: 0.95em;"><strong>支払い区分</strong><br>モバイル・TR伝票・NA伝票で入金区分<strong>「その他」</strong>を選択</span></li>
+          </ol>
+        </div>
+        
+        <div style="background-color: #fff3cd; border: 2px solid #ffc107; padding: 10px; border-radius: 5px; margin: 10px 0;">
+          <h4 style="color: #856404; margin-top: 0; margin-bottom: 5px; font-size: 1.05em;">📋 事務担当者：確認項目</h4>
+          <div style="line-height: 1.5; padding-left: 10px; font-size: 0.95em;">
+            <p style="margin: 5px 0;"><strong>▪️入金区分：</strong><strong>「その他」</strong><strong style="color: rgb(65, 84, 98);">▪️お客様の氏名</strong><strong style="color: rgb(65, 84, 98);">▪️郵送先住所</strong><strong style="color: rgb(65, 84, 98);">▪️請求金額</strong></p><p style="margin: 5px 0;"><strong style="color: rgb(65, 84, 98);">▪️お客様の電話番号</strong><strong style="color: rgb(65, 84, 98);">▪️作業完了日</strong></p>
+          </div>
+        </div>
+      </div>
+
+
+
+      <h2 style="color: #dc3545; border-bottom: 2px solid #dc3545; padding-bottom: 8px; margin-top: 15px; margin-bottom: 10px; font-size: 1.3em;">④ どうしてもその場で現金払いとなった場合</h2>
+      
+      <div style="text-align: center; margin: 10px 0;">
+        <button class="procedure-btn" style="background-color: #dc3545; max-width: 300px;" onclick="showDetails('cash-emergency-details')">手順を表示</button>
+      </div>
+
+      <div id="cash-emergency-details" class="full-width-details" style="display: none; border-color: rgb(220, 53, 69); background-color: rgb(255, 245, 245);">
+        <div class="details-header">
+          <div class="details-title" style="color: #dc3545;">💴 緊急時の現金対応手順</div>
+          <button class="close-btn" onclick="hideDetails()">✖ 閉じる</button>
+        </div>
+        
+        <div style="background-color: #fff3cd; border: 2px solid #ffc107; padding: 10px; border-radius: 5px; margin: 10px 0;">
+          <p style="font-weight: bold; color: #856404; margin: 5px 0;">⚠️ 注意事項</p>
+          <p style="margin: 5px 0; font-size: 0.95em;">事前（訪問前）に支払手段の確認を必ず行うため、ほとんど無いケースです</p>
+        </div>
+        
+        <div style="background-color: white; padding: 10px; border-radius: 5px; margin: 10px 0;">
+          <h4 style="color: #dc3545; margin-top: 0; margin-bottom: 5px; font-size: 1.05em;">🚨 対応が必要なケース</h4>
+          <p style="margin: 5px 0; font-size: 0.95em;">万が一、やむを得ない理由により、どうしてもその場で現金を預かるしかない場合</p>
+          <ul style="margin: 5px 0; padding-left: 20px; font-size: 0.95em; line-height: 1.5;">
+            <li>お客様が携帯電話を持っていない</li>
+            <li>コンビニや郵便局に行けない</li>
+            <li>その他、やむを得ない特別な事情がある</li>
+          </ul>
+        </div>
+        
+        <div style="background-color: white; padding: 10px; border-radius: 5px; margin: 10px 0;">
+          <h4 style="color: #dc3545; margin-top: 0; margin-bottom: 5px; font-size: 1.05em;">👤 担当者の対応手順</h4>
+          <ol style="line-height: 1.5; font-size: 0.95em;">
+            <li><strong>管理者へ連絡</strong><br>
+            現金を預かる前に、必ず管理者へ一報を入れて了承を得てください</li>
+            
+            <li><strong>現金を預かる</strong><br>
+            管理者の了承を得た後、お客様から現金を預かり、領収証を発行します</li>
+            
+            <li><strong>②コンビニ決済（SMS送信）を利用</strong><br>
+            上記の「②コンビニ決済（SMS送信）」の手順に従い、<strong style="color: #dc3545;">自身の会社携帯電話番号</strong>宛にSMSを送信します</li>
+            
+            <li><strong>当日中にコンビニで支払い</strong>&nbsp;　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　<span style="color: #dc3545; font-weight: bold;">必ず当日中に</span>、受信したSMSを使ってコンビニで支払いを完了してください</li>
+          </ol>
+        </div>
+        
+        <div style="background-color: #ffe6e6; border: 2px solid #dc3545; padding: 10px; border-radius: 5px; margin: 10px 0;">
+          <h4 style="color: #dc3545; margin-top: 0; margin-bottom: 5px; font-size: 1.05em;">⚠️ 重要な注意点</h4>
+          <div style="line-height: 1.5; padding-left: 10px; font-size: 0.95em;">
+            <p style="margin: 5px 0;"><strong>▪️ 必ず管理者の了承を得る：</strong>勝手に現金を預かることは禁止です</p>
+            <p style="margin: 5px 0;"><strong>▪️ 当日中の支払い：</strong>翌日以降への持ち越しは厳禁です</p>
+            <p style="margin: 5px 0;"><strong>▪️ 自身の携帯へSMS送信：</strong>お客様の携帯ではなく、自分の会社携帯に送信します</p>
+            <p style="margin: 5px 0;"><strong>▪️ 領収証の発行：</strong>現金を預かったら必ず領収証を発行してください</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="page-number" style="margin-top: 20px;"></div>
+    </div>
+
+    <script>
+      // iPad対応：タッチイベントとクリックイベントの両方に対応
+      document.addEventListener('DOMContentLoaded', function() {
+        console.log('DOM Loaded - Initializing buttons');
+        
+        // すべてのボタンにイベントリスナーを追加
+        initializeButtons();
+      });
+      
+      function initializeButtons() {
+        // procedure-btnクラスのボタン
+        const procedureBtns = document.querySelectorAll('.procedure-btn');
+        procedureBtns.forEach(btn => {
+          // クリックイベント
+          btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            console.log('Button clicked:', this);
+            const elementId = this.getAttribute('onclick').match(/'([^']+)'/)[1];
+            showDetails(elementId);
+          });
+          
+          // タッチイベント（iPad対応）
+          btn.addEventListener('touchend', function(e) {
+            e.preventDefault();
+            console.log('Button touched:', this);
+            const elementId = this.getAttribute('onclick').match(/'([^']+)'/)[1];
+            showDetails(elementId);
+          });
+        });
+        
+        // reader-guide-btnボタン
+        const readerBtns = document.querySelectorAll('.reader-guide-btn');
+        readerBtns.forEach(btn => {
+          btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            console.log('Reader guide button clicked');
+            showReaderGuide();
+          });
+          
+          btn.addEventListener('touchend', function(e) {
+            e.preventDefault();
+            console.log('Reader guide button touched');
+            showReaderGuide();
+          });
+        });
+        
+        // close-btnボタン
+        const closeBtns = document.querySelectorAll('.close-btn');
+        closeBtns.forEach(btn => {
+          btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            console.log('Close button clicked');
+            const onclick = this.getAttribute('onclick');
+            if (onclick && onclick.includes('hideReaderGuide')) {
+              hideReaderGuide();
+            } else {
+              hideDetails();
+            }
+          });
+          
+          btn.addEventListener('touchend', function(e) {
+            e.preventDefault();
+            console.log('Close button touched');
+            const onclick = this.getAttribute('onclick');
+            if (onclick && onclick.includes('hideReaderGuide')) {
+              hideReaderGuide();
+            } else {
+              hideDetails();
+            }
+          });
+        });
+        
+        console.log('All buttons initialized');
+      }
+      
+      function showDetails(elementId) {
+        console.log('showDetails called:', elementId);
+        // Hide all details sections
+        const allDetails = document.querySelectorAll('.full-width-details');
+        allDetails.forEach(section => {
+          section.style.display = 'none';
+        });
+        
+        // Hide reader guide
+        const readerGuide = document.getElementById('reader-guide');
+        if (readerGuide) {
+          readerGuide.style.display = 'none';
+        }
+        
+        // Show the selected details section
+        const targetSection = document.getElementById(elementId);
+        if (targetSection) {
+          console.log('Target section found:', elementId);
+          targetSection.style.display = 'block';
+          
+          // iPadでのスクロール改善
+          setTimeout(() => {
+            targetSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          }, 100);
+        } else {
+          console.error('Target section not found:', elementId);
+        }
+      }
+      
+      function hideDetails() {
+        console.log('hideDetails called');
+        const allDetails = document.querySelectorAll('.full-width-details');
+        allDetails.forEach(section => {
+          section.style.display = 'none';
+        });
+      }
+      
+      function showReaderGuide() {
+        console.log('showReaderGuide called');
+        // Hide all other details sections
+        hideDetails();
+        
+        // Show the reader guide
+        const readerGuide = document.getElementById('reader-guide');
+        if (readerGuide) {
+          console.log('Reader guide found');
+          readerGuide.style.display = 'block';
+          
+          // iPadでのスクロール改善
+          setTimeout(() => {
+            readerGuide.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          }, 100);
+        } else {
+          console.error('Reader guide not found');
+        }
+      }
+      
+      function hideReaderGuide() {
+        console.log('hideReaderGuide called');
+        const readerGuide = document.getElementById('reader-guide');
+        if (readerGuide) {
+          readerGuide.style.display = 'none';
+        }
+      }
+    </script>
+
+
+  
+
+</body></html>
